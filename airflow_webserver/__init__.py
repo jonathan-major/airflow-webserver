@@ -20,7 +20,7 @@ from flask_appbuilder import SQLA, AppBuilder, IndexView, expose
 from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
-app.config.from_object('config')
+app.config.from_object('airflow_webserver_config')
 app.secret_key = configuration.get('webserver', 'SECRET_KEY')
 
 csrf = CSRFProtect()
