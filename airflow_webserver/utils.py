@@ -26,12 +26,12 @@ import wtforms
 import bleach
 import markdown
 
-from datetime import datetime
 from pygments import highlight, lexers
 from flask import request, Response, g, Markup, url_for
 from flask_login import current_user
 
 from airflow import configuration, models, settings
+from airflow.utils import timezone
 from airflow.utils.json import AirflowJsonEncoder
 from airflow.utils.state import State
 
@@ -202,8 +202,8 @@ def make_cache_key(*args, **kwargs):
 
 
 def task_instance_link(attr):
-    dag_id = bleach.clean(attr.get('dag_id'))
-    task_id = bleach.clean(attr.get('task_id'))
+    dag_id = bleach.clean(attr.get('dag_id')) if attr.get('dag_id') else None
+    task_id = bleach.clean(attr.get('task_id')) if attr.get('task_id') else None
     execution_date = attr.get('execution_date')
     url = url_for(
         'Airflow.task',
@@ -247,17 +247,17 @@ def nobr_f(attr_name):
 
 
 def datetime_f(attr_name):
-    def datetime(attr):
+    def dt(attr):
         f = attr.get(attr_name)
         f = f.isoformat() if f else ''
-        if datetime.now().isoformat()[:4] == f[:4]:
+        if timezone.utcnow().isoformat()[:4] == f[:4]:
             f = f[5:]
         return Markup("<nobr>{}</nobr>".format(f))
-    return datetime
+    return dt
 
 
 def dag_link(attr):
-    dag_id = bleach.clean(attr.get('dag_id'))
+    dag_id = bleach.clean(attr.get('dag_id')) if attr.get('dag_id') else None
     execution_date = attr.get('execution_date')
     url = url_for(
         'Airflow.graph',
@@ -268,8 +268,8 @@ def dag_link(attr):
 
 
 def dag_run_link(attr):
-    dag_id = bleach.clean(attr.get('dag_id'))
-    run_id = bleach.clean(attr.get('run_id'))
+    dag_id = bleach.clean(attr.get('dag_id')) if attr.get('dag_id') else None
+    run_id = bleach.clean(attr.get('run_id')) if attr.get('run_id') else None
     execution_date = attr.get('execution_date')
     url = url_for(
         'Airflow.graph',

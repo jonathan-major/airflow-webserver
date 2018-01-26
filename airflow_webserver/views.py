@@ -21,7 +21,6 @@ import os
 import pkg_resources
 import socket
 from datetime import datetime, timedelta
-import dateutil.parser
 import copy
 import math
 import json
@@ -30,6 +29,7 @@ from textwrap import dedent
 import traceback
 import markdown
 import nvd3
+import pendulum
 from jinja2 import escape
 
 import sqlalchemy as sqla
@@ -61,6 +61,7 @@ from airflow.settings import Session
 from airflow.models import XCom, DagRun
 from airflow.ti_deps.dep_context import DepContext, QUEUE_DEPS, SCHEDULER_DEPS
 
+from airflow.utils import timezone
 from airflow.utils.json import json_ser
 from airflow.utils.state import State
 from airflow.utils.db import provide_session
@@ -388,7 +389,7 @@ class Airflow(AirflowBaseView):
         dag_id = request.args.get('dag_id')
         task_id = request.args.get('task_id')
         execution_date = request.args.get('execution_date')
-        dttm = dateutil.parser.parse(execution_date)
+        dttm = pendulum.parse(execution_date)
         form = DateTimeForm(data={'execution_date': dttm})
         dag = dagbag.get_dag(dag_id)
         task = copy.copy(dag.get_task(task_id))
@@ -423,7 +424,7 @@ class Airflow(AirflowBaseView):
         dag_id = request.args.get('dag_id')
         task_id = request.args.get('task_id')
         execution_date = request.args.get('execution_date')
-        dttm = dateutil.parser.parse(execution_date)
+        dttm = pendulum.parse(execution_date)
         form = DateTimeForm(data={'execution_date': dttm})
         dag = dagbag.get_dag(dag_id)
         session = Session()
@@ -465,7 +466,7 @@ class Airflow(AirflowBaseView):
         # Carrying execution_date through, even though it's irrelevant for
         # this context
         execution_date = request.args.get('execution_date')
-        dttm = dateutil.parser.parse(execution_date)
+        dttm = pendulum.parse(execution_date)
         form = DateTimeForm(data={'execution_date': dttm})
         dag = dagbag.get_dag(dag_id)
 
@@ -541,7 +542,7 @@ class Airflow(AirflowBaseView):
         # Carrying execution_date through, even though it's irrelevant for
         # this context
         execution_date = request.args.get('execution_date')
-        dttm = dateutil.parser.parse(execution_date)
+        dttm = pendulum.parse(execution_date)
         form = DateTimeForm(data={'execution_date': dttm})
         dag = dagbag.get_dag(dag_id)
         if not dag or task_id not in dag.task_ids:
@@ -581,7 +582,7 @@ class Airflow(AirflowBaseView):
         task = dag.get_task(task_id)
 
         execution_date = request.args.get('execution_date')
-        execution_date = dateutil.parser.parse(execution_date)
+        execution_date = pendulum.parse(execution_date)
         ignore_all_deps = request.args.get('ignore_all_deps') == "true"
         ignore_task_deps = request.args.get('ignore_task_deps') == "true"
         ignore_ti_state = request.args.get('ignore_ti_state') == "true"
@@ -640,7 +641,7 @@ class Airflow(AirflowBaseView):
             flash("Cannot find dag {}".format(dag_id))
             return redirect(origin)
 
-        execution_date = datetime.utcnow()
+        execution_date = timezone.utcnow()
         run_id = "manual__{0}".format(execution_date.isoformat())
 
         dr = DagRun.find(dag_id=dag_id, run_id=run_id)
@@ -703,7 +704,7 @@ class Airflow(AirflowBaseView):
         dag = dagbag.get_dag(dag_id)
 
         execution_date = request.args.get('execution_date')
-        execution_date = dateutil.parser.parse(execution_date)
+        execution_date = pendulum.parse(execution_date)
         confirmed = request.args.get('confirmed') == "true"
         upstream = request.args.get('upstream') == "true"
         downstream = request.args.get('downstream') == "true"
@@ -733,7 +734,7 @@ class Airflow(AirflowBaseView):
         confirmed = request.args.get('confirmed') == "true"
 
         dag = dagbag.get_dag(dag_id)
-        execution_date = dateutil.parser.parse(execution_date)
+        execution_date = pendulum.parse(execution_date)
         start_date = execution_date
         end_date = execution_date
 
@@ -776,7 +777,7 @@ class Airflow(AirflowBaseView):
             flash('Invalid execution date', 'error')
             return redirect(origin)
 
-        execution_date = dateutil.parser.parse(execution_date)
+        execution_date = pendulum.parse(execution_date)
         dag = dagbag.get_dag(dag_id)
 
         if not dag:
@@ -812,7 +813,7 @@ class Airflow(AirflowBaseView):
         task.dag = dag
 
         execution_date = request.args.get('execution_date')
-        execution_date = dateutil.parser.parse(execution_date)
+        execution_date = pendulum.parse(execution_date)
         confirmed = request.args.get('confirmed') == "true"
         upstream = request.args.get('upstream') == "true"
         downstream = request.args.get('downstream') == "true"
@@ -874,9 +875,9 @@ class Airflow(AirflowBaseView):
         num_runs = int(num_runs) if num_runs else 25
 
         if base_date:
-            base_date = dateutil.parser.parse(base_date)
+            base_date = pendulum.parse(base_date)
         else:
-            base_date = dag.latest_execution_date or datetime.utcnow()
+            base_date = dag.latest_execution_date or timezone.utcnow()
 
         dates = dag.date_range(base_date, num=-abs(num_runs))
         min_date = dates[0] if dates else datetime(2000, 1, 1)
@@ -932,7 +933,7 @@ class Airflow(AirflowBaseView):
             def set_duration(tid):
                 if (isinstance(tid, dict) and tid.get("state") == State.RUNNING and
                             tid["start_date"] is not None):
-                    d = datetime.utcnow() - dateutil.parser.parse(tid["start_date"])
+                    d = timezone.utcnow() - pendulum.parse(tid["start_date"])
                     tid["duration"] = d.total_seconds()
                 return tid
 
@@ -1028,9 +1029,9 @@ class Airflow(AirflowBaseView):
 
         dttm = request.args.get('execution_date')
         if dttm:
-            dttm = dateutil.parser.parse(dttm)
+            dttm = pendulum.parse(dttm)
         else:
-            dttm = dag.latest_execution_date or datetime.utcnow().date()
+            dttm = dag.latest_execution_date or timezone.utcnow()
 
         DR = models.DagRun
         drs = (
@@ -1105,9 +1106,9 @@ class Airflow(AirflowBaseView):
         num_runs = int(num_runs) if num_runs else 25
 
         if base_date:
-            base_date = dateutil.parser.parse(base_date)
+            base_date = pendulum.parse(base_date)
         else:
-            base_date = dag.latest_execution_date or datetime.utcnow()
+            base_date = dag.latest_execution_date or timezone.utcnow()
 
         dates = dag.date_range(base_date, num=-abs(num_runs))
         min_date = dates[0] if dates else datetime(2000, 1, 1)
@@ -1211,9 +1212,9 @@ class Airflow(AirflowBaseView):
         num_runs = int(num_runs) if num_runs else 25
 
         if base_date:
-            base_date = dateutil.parser.parse(base_date)
+            base_date = pendulum.parse(base_date)
         else:
-            base_date = dag.latest_execution_date or datetime.utcnow()
+            base_date = dag.latest_execution_date or timezone.utcnow()
 
         dates = dag.date_range(base_date, num=-abs(num_runs))
         min_date = dates[0] if dates else datetime(2000, 1, 1)
@@ -1275,9 +1276,9 @@ class Airflow(AirflowBaseView):
         num_runs = int(num_runs) if num_runs else 25
 
         if base_date:
-            base_date = dateutil.parser.parse(base_date)
+            base_date = pendulum.parse(base_date)
         else:
-            base_date = dag.latest_execution_date or datetime.utcnow()
+            base_date = dag.latest_execution_date or timezone.utcnow()
 
         dates = dag.date_range(base_date, num=-abs(num_runs))
         min_date = dates[0] if dates else datetime(2000, 1, 1)
@@ -1371,7 +1372,7 @@ class Airflow(AirflowBaseView):
             DagModel).filter(DagModel.dag_id == dag_id).first()
 
         if orm_dag:
-            orm_dag.last_expired = datetime.utcnow()
+            orm_dag.last_expired = timezone.utcnow()
             session.merge(orm_dag)
         session.commit()
         session.close()
@@ -1406,9 +1407,9 @@ class Airflow(AirflowBaseView):
 
         dttm = request.args.get('execution_date')
         if dttm:
-            dttm = dateutil.parser.parse(dttm)
+            dttm = pendulum.parse(dttm)
         else:
-            dttm = dag.latest_execution_date or datetime.utcnow().date()
+            dttm = dag.latest_execution_date or timezone.utcnow()
 
         form = DateTimeForm(data={'execution_date': dttm})
 
@@ -1419,7 +1420,7 @@ class Airflow(AirflowBaseView):
 
         tasks = []
         for ti in tis:
-            end_date = ti.end_date if ti.end_date else datetime.utcnow()
+            end_date = ti.end_date if ti.end_date else timezone.utcnow()
             tasks.append({
                 'startDate': wwwutils.epoch(ti.start_date),
                 'endDate': wwwutils.epoch(end_date),
@@ -1462,7 +1463,7 @@ class Airflow(AirflowBaseView):
 
         dttm = request.args.get('execution_date')
         if dttm:
-            dttm = dateutil.parser.parse(dttm)
+            dttm = pendulum.parse(dttm)
         else:
             return ("Error: Invalid execution_date")
 
@@ -1884,15 +1885,14 @@ class DagRunModelView(AirflowModelViewReadWrite):
                 count += 1
                 dr.state = target_state
                 if target_state == State.RUNNING:
-                    dr.start_date = datetime.now()
+                    dr.start_date = timezone.utcnow()
                 else:
-                    dr.end_date = datetime.now()
+                    dr.end_date = timezone.utcnow()
             session.commit()
             models.DagStat.update(dirty_ids, session=session)
             flash(
                 "{count} dag runs were set to '{target_state}'".format(**locals()))
         except Exception as ex:
-            raise Exception("Ooops")
             flash('Failed to set state', 'error')
         return redirect(self.route_base + '/list')
 
@@ -2026,7 +2026,7 @@ class TaskInstanceModelView(AirflowModelViewReadWrite):
         https://github.com/flask-admin/flask-admin/issues/1226
         """
         task_id, dag_id, execution_date = iterdecode(id)
-        execution_date = dateutil.parser.parse(execution_date)
+        execution_date = pendulum.parse(execution_date)
         return self.session.query(self.model).get((task_id, dag_id, execution_date))
 
 

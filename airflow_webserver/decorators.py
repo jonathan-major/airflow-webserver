@@ -14,7 +14,7 @@
 
 import gzip
 import functools
-import dateutil.parser as dateparser
+import pendulum
 from io import BytesIO as IO
 from flask import after_this_request, request, g
 from airflow import models, settings
@@ -42,7 +42,7 @@ def action_logging(f):
             dag_id=request.args.get('dag_id'))
 
         if 'execution_date' in request.args:
-            log.execution_date = dateparser.parse(
+            log.execution_date = pendulum.parse(
                 request.args.get('execution_date'))
 
         session.add(log)
