@@ -1,3 +1,5 @@
+UPDATE: I've created a [Pull Request](https://github.com/apache/incubator-airflow/pull/3015) against Apache-Airflow master (review/testing welcome!). It will be released with Airflow 1.10. In order to introduce RBAC feature to Airflow sooner, the DAG-level permission feature is deprioritized for a future release. 
+
 Airflow-Webserver
 --------------------------------------------------------------
 
@@ -13,7 +15,7 @@ Airflow-Webserver will be merged back into Airflow's source code in the near fut
 Setup
 --------------------------------------------------------------
 
-Airflow-Webserver is written on top of Airflow 1.9.0, which is not currently in PyPI. Make sure you have airflow 1.9.0 installed before attempting the setup below.
+Airflow-Webserver is written on top of Airflow 1.9.0, which is not currently in PyPI. Make sure you have airflow 1.9.0+ installed before attempting the setup below.
 
 - Clone the repo
 
@@ -36,10 +38,3 @@ Airflow-Webserver is written on top of Airflow 1.9.0, which is not currently in 
 - To start the webserver
 
         `fabmanager run --app airflow_webserver`
-
-
-Work-in-progress
---------------------------------------------------------------
-
-- DAG-level access control
-- Tests
