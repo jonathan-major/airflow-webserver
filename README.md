@@ -1,11 +1,9 @@
-UPDATE: I've created a [Pull Request](https://github.com/apache/incubator-airflow/pull/3015) against Apache-Airflow master (review/testing welcome!). It will be released with Airflow 1.10. In order to introduce RBAC feature to Airflow sooner, the DAG-level permission feature is deprioritized for a future release. 
-
 Airflow-Webserver
 --------------------------------------------------------------
 
-NOTE: This is work-in-progress repository for the migration of [Airflow](https://github.com/apache/incubator-airflow)'s webserver from Flask-Admin to [Flask-AppBuilder (FAB)](https://github.com/dpgaspar/Flask-AppBuilder).
+UPDATE: I've created a [Pull Request](https://github.com/apache/incubator-airflow/pull/3015) against [Apache-Airflow](https://github.com/apache/incubator-airflow) master (review/testing welcome!). It will be released with Airflow 1.10. In order to introduce RBAC feature to Airflow sooner, the DAG-level permission feature is deprioritized for a future release. 
 
-The goal of this Airflow Webserver fork is to leverage FAB's build-in security features to introduce the following capabilities in the UI:
+Airflow Webserver uses the [Flask-AppBuilder (FAB)](https://github.com/dpgaspar/Flask-AppBuilder) extension instead of Flask-Admin. The goal of this Airflow Webserver is to leverage FAB's build-in security features to introduce the following capabilities in the UI:
 - role-based access control
 - support for various authentications backends (OAuth, OpenID, Database, LDAP, etc.)
 - dag-level permissions
