@@ -4,7 +4,7 @@
 --------------------------------------------------------------
 March 23, 2018
 
-RBAC UI has been merged into [Apache-Airflow master](https://github.com/apache/incubator-airflow), and will be released with Airflow 1.10.0. I will no longer be maintaining this repo. If you are interested in using the RBAC feature you can now do so. See the `New Webserver UI with Role-Based Access Control` section in [UPDATING.md](https://github.com/apache/incubator-airflow/blob/master/UPDATING.md) for instructions.
+RBAC UI has been merged into [Apache-Airflow master](https://github.com/apache/incubator-airflow), and will be released with Airflow 1.10.0. I will no longer be maintaining this repo. If you are interested in using the RBAC feature, see the `New Webserver UI with Role-Based Access Control` section in [UPDATING.md](https://github.com/apache/incubator-airflow/blob/master/UPDATING.md) for instructions.
 
 ### About
 --------------------------------------------------------------
